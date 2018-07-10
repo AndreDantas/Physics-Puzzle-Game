@@ -4,29 +4,41 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using Sirenix.OdinInspector;
-public class GameGrid : MonoBehaviour
+public abstract class GameGrid : MonoBehaviour
 {
-
     public Vector2 gridCenter;
     public float cellSize = 1f;
     [ShowInInspector]
-    public Bounds gridValues { get => new Bounds(gridCenter, new Vector3(columns * cellSize, rows * cellSize)); }
+    public Bounds gridValues { get { return new Bounds(gridCenter, new Vector3(columns * cellSize, rows * cellSize)); } }
+    public ProceduralMeshRenderer cellHover;
     protected GameObject gridPlane;
     protected GameObject cellsParent;
 
     [SerializeField, HideInInspector]
-    private int columns;
+    protected int columns = 4;
     [ShowInInspector]
-    public int Columns { get => columns; set => columns = UtilityFunctions.ClampMin(value, 1); }
+    public int Columns { get { return columns; } set { columns = UtilityFunctions.ClampMin(value, 1); } }
     [SerializeField, HideInInspector]
-    private int rows;
+    protected int rows = 4;
     [ShowInInspector]
-    public int Rows { get => rows; set => rows = UtilityFunctions.ClampMin(value, 1); }
+    public int Rows { get { return rows; } set { rows = UtilityFunctions.ClampMin(value, 1); } }
 
     protected GridCell[,] gridCells;
 
+    private void Start()
+    {
+        BuildGrid();
+    }
+
+    private void Update()
+    {
+        var cell = GetCell(Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)));
+        if (cell)
+            LightCell(cell.transform.position);
+    }
+
     [Button(ButtonSizes.Large)]
-    public void BuildGrid()
+    public virtual void BuildGrid()
     {
         if (columns <= 0 || rows <= 0)
             return;
@@ -60,7 +72,7 @@ public class GameGrid : MonoBehaviour
 
     }
 
-    GridCell PrepareCell(int i, int j)
+    protected virtual GridCell PrepareCell(int i, int j)
     {
 
         var obj = new GameObject();
@@ -79,4 +91,53 @@ public class GameGrid : MonoBehaviour
     {
         UtilityFunctions.GizmosDrawGrid(gridValues.min, columns, rows, cellSize);
     }
+
+    public void LightCell(Vector3 pos)
+    {
+        cellHover?.RenderSquaresArea(new List<Vector3> { pos + new Vector3(0, 0, -1f) }, cellSize, cellSize);
+    }
+
+    /// <summary>
+    /// Checks if the coordinate is valid in this grid.
+    /// </summary>
+    public bool ValidCoordinate(int x, int y)
+    {
+        if (gridCells == null)
+            return false;
+        if (x < 0 || x >= gridCells.GetLength(0))
+            return false;
+        if (y < 0 || y >= gridCells.GetLength(1))
+            return false;
+
+        return true;
+    }
+
+    public GridCell GetCell(int x, int y)
+    {
+        if (gridCells?.ValidCoordinates(x, y) ?? false)
+        {
+            return gridCells[x, y];
+        }
+        return null;
+    }
+
+    public GridCell GetCell(Vector2 position)
+    {
+        Vector2 deltaPos = position - gridCenter + new Vector2((Columns / 2) * cellSize, (Rows / 2) * cellSize) + new Vector2(cellSize / 2f, cellSize / 2f);
+        deltaPos = deltaPos / cellSize;
+        var pos = new Position(Mathf.FloorToInt(deltaPos.x), Mathf.FloorToInt(deltaPos.y));
+
+        if (ValidCoordinate(pos.x, pos.y))
+        {
+            return gridCells[pos.x, pos.y];
+        }
+        return null;
+    }
+
+    public bool ValidPosition(Vector2 pos)
+    {
+        return gridValues.Contains(pos);
+
+    }
+
 }

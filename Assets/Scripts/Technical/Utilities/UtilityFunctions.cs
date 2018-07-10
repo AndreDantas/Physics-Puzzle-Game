@@ -854,6 +854,8 @@ public static class UtilityFunctions
     /// <param name="listener"></param>
     public static void RemoveAndAddListener(this UnityEvent y, UnityAction listener)
     {
+        if (y == null)
+            return;
         y.RemoveListener(listener);
         y.AddListener(listener);
     }
@@ -864,6 +866,8 @@ public static class UtilityFunctions
     /// <param name="listener"></param>
     public static void RemoveAndAddListener<T>(this UnityEvent<T> y, UnityAction<T> listener)
     {
+        if (y == null)
+            return;
         y.RemoveListener(listener);
         y.AddListener(listener);
     }
@@ -874,6 +878,8 @@ public static class UtilityFunctions
     /// <param name="listener"></param>
     public static void RemoveAndAddListener<T1, T2>(this UnityEvent<T1, T2> y, UnityAction<T1, T2> listener)
     {
+        if (y == null)
+            return;
         y.RemoveListener(listener);
         y.AddListener(listener);
     }/// <summary>
@@ -883,6 +889,8 @@ public static class UtilityFunctions
      /// <param name="listener"></param>
     public static void RemoveAndAddListener<T1, T2, T3>(this UnityEvent<T1, T2, T3> y, UnityAction<T1, T2, T3> listener)
     {
+        if (y == null)
+            return;
         y.RemoveListener(listener);
         y.AddListener(listener);
     }

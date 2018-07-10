@@ -16,6 +16,7 @@ public class GridCell : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         PointerOn = true;
+        //grid?.LightCell(transform.position);
     }
 
     public void OnPointerExit(PointerEventData eventData)
